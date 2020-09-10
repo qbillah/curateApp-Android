@@ -2,7 +2,9 @@ package com.example.curatetest;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
@@ -15,10 +17,31 @@ public class MainActivity extends AppCompatActivity {
     private TextView blankEmailAlert;
     private String userEmail;
 
+    Session sessionManager;
+
+    public static final String SHARED_PREFS = "sharedPrefs";
+    public static final String EMAIL = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sessionManager = new Session(getApplicationContext());
+    }
+
+    //ON START CHECK IF USER IS LOGGED IN
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+        boolean isLoggedIn = sessionManager.getLogin();
+        if(isLoggedIn){
+            System.out.println("Logged In");
+            System.out.println(sessionManager.getUserName());
+            System.out.println(sessionManager.getUserEmail());
+        }else if(!isLoggedIn){
+            System.out.println("Not Logged In");
+        }
     }
 
     public void getUserEmail (View view){
@@ -27,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         //IF REGISTERED TAKE INTO APP
         //IF NOT, TAKE TO SIGN UP PAGE
 
-        getUserEmail = (EditText) findViewById(R.id.userName);
+        getUserEmail = (EditText) findViewById(R.id.userEmail);
         blankEmailAlert = (TextView) findViewById(R.id.registerAlert);
         userEmail = getUserEmail.getText().toString();
 
@@ -42,10 +65,11 @@ public class MainActivity extends AppCompatActivity {
                 //IF EMAIL IS REGISTERED TAKE TO SIGN IN VIEW
                 //IF EMAIL ISN'T REGISTERED TAKE TO SIGN UP VIEW
 
-                //REPLACE WITH ACTUAL CALL TO DATABASE
-
                 //ADD EMAIL TO SHARED PREFERENCES ****
 
+                saveEmailPref(userEmail);
+
+                //REPLACE WITH ACTUAL CALL TO DATABASE
                 if(userEmail.equals("yasinbillahdesigns@gmail.com")){
                     //RETURN PASSWORD VIEW
                     openSignInActivity();
@@ -80,6 +104,10 @@ public class MainActivity extends AppCompatActivity {
     public void openRegisterActivity(){
         Intent registerNewUser = new Intent(this , registerActivity.class);
         startActivity(registerNewUser);
+    }
+
+    public void saveEmailPref(String email){
+        sessionManager.setUserEmail(email);
     }
 
 }

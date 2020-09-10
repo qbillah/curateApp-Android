@@ -100,6 +100,10 @@ public class registerActivity extends AppCompatActivity {
         sessionManager.setLogin(true);
 
         System.out.println("Logged In");
+
+        //REDIRECT TO USER DASHBOARD AFTER USER IS REGISTERED AND LOGGED IN
+        Intent curateDashboard = new Intent(this , dashboard.class);
+        startActivity(curateDashboard);
     }
 
 }

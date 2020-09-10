@@ -36,9 +36,8 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         boolean isLoggedIn = sessionManager.getLogin();
         if(isLoggedIn){
-            System.out.println("Logged In");
-            System.out.println(sessionManager.getUserName());
-            System.out.println(sessionManager.getUserEmail());
+            Intent curateDashboard = new Intent(this , dashboard.class);
+            startActivity(curateDashboard);
         }else if(!isLoggedIn){
             System.out.println("Not Logged In");
         }

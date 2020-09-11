@@ -12,12 +12,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link ClosetFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class ClosetFragment extends Fragment {
+
+    private FirebaseAuth mAuth;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -57,6 +61,7 @@ public class ClosetFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        mAuth = FirebaseAuth.getInstance();
     }
 
     @Override
@@ -70,15 +75,13 @@ public class ClosetFragment extends Fragment {
             public void onClick(View v)
             {
                 logout();
-                startActivity(new Intent(getActivity() , MainActivity.class));
             }
         });
         return view;
     }
 
     public void logout(){
-        Session sessionManager = new Session(getContext());
-        sessionManager.editor.clear();
-        sessionManager.editor.commit();
+        mAuth.signOut();
+        startActivity(new Intent(getActivity() , MainActivity.class));
     }
 }

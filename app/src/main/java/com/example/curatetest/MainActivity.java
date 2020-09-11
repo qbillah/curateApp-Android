@@ -1,5 +1,6 @@
 package com.example.curatetest;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -9,23 +10,37 @@ import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.SignInMethodQueryResult;
+
 public class MainActivity extends AppCompatActivity {
+
+    private FirebaseAuth mAuth;
 
     private EditText getUserEmail;
     private TextView blankEmailAlert;
     private String userEmail;
 
-    Session sessionManager;
+    private ProgressBar mainPB;
 
+    Session sessionManager;
+/*
     public static final String SHARED_PREFS = "sharedPrefs";
     public static final String EMAIL = "";
-
+*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mAuth = FirebaseAuth.getInstance();
         sessionManager = new Session(getApplicationContext());
     }
 
@@ -34,12 +49,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart(){
         super.onStart();
-        boolean isLoggedIn = sessionManager.getLogin();
-        if(isLoggedIn){
+        //FIREBASE AUTH - IS LOGGED IN
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser != null){
             Intent curateDashboard = new Intent(this , dashboard.class);
             startActivity(curateDashboard);
-        }else if(!isLoggedIn){
-            System.out.println("Not Logged In");
         }
     }
 
@@ -65,32 +79,20 @@ public class MainActivity extends AppCompatActivity {
                 //IF EMAIL ISN'T REGISTERED TAKE TO SIGN UP VIEW
 
                 //ADD EMAIL TO SHARED PREFERENCES ****
-
                 saveEmailPref(userEmail);
-
-                //REPLACE WITH ACTUAL CALL TO DATABASE
-                if(userEmail.equals("yasinbillahdesigns@gmail.com")){
-                    //RETURN PASSWORD VIEW
-                    openSignInActivity();
-                }else{
-                    // RETURN REGISTER VIEW
-                    openRegisterActivity();
-                }
-
+                userExists(userEmail);
             }else if(isValidEmail(userEmail) == false){
                 blankEmailAlert.setText("Must be a valid email address.");
                 blankEmailAlert.setVisibility(View.VISIBLE);
             }
-
         }
-
     }
 
-    public void forgotPassword (View view){
+    public void forgotPassword (){
         //TAKE TO FORGOT PASSWORD VIEW
     }
 
-    boolean isValidEmail(CharSequence userEmail){
+    public boolean isValidEmail(CharSequence userEmail){
         //EMAIL VALIDATION FUNCTION
         return Patterns.EMAIL_ADDRESS.matcher(userEmail).matches();
     }
@@ -107,6 +109,26 @@ public class MainActivity extends AppCompatActivity {
 
     public void saveEmailPref(String email){
         sessionManager.setUserEmail(email);
+    }
+
+    public void userExists(String user){
+
+        //mainPB = (ProgressBar) findViewById(R.id.mainProgressBar);
+        //mainPB.setVisibility(View.VISIBLE);
+
+        mAuth.fetchSignInMethodsForEmail(user)
+                .addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<SignInMethodQueryResult> task) {
+                        //mainPB.setVisibility(View.GONE);
+                        boolean check = !task.getResult().getSignInMethods().isEmpty();
+                        if(!check){
+                            openRegisterActivity();
+                        }else{
+                            openSignInActivity();
+                        }
+                    }
+                });
     }
 
 }

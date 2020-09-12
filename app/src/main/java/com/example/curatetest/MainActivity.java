@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         sessionManager = new Session(getApplicationContext());
+        mainPB = (ProgressBar) findViewById(R.id.mainProgressBar);
     }
 
     //ON START CHECK IF USER IS LOGGED IN
@@ -113,14 +114,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void userExists(String user){
 
-        //mainPB = (ProgressBar) findViewById(R.id.mainProgressBar);
-        //mainPB.setVisibility(View.VISIBLE);
-
+        //
+        //
+        mainPB.setVisibility(View.VISIBLE);
         mAuth.fetchSignInMethodsForEmail(user)
                 .addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>() {
                     @Override
                     public void onComplete(@NonNull Task<SignInMethodQueryResult> task) {
-                        //mainPB.setVisibility(View.GONE);
+                        mainPB.setVisibility(View.GONE);
                         boolean check = !task.getResult().getSignInMethods().isEmpty();
                         if(!check){
                             openRegisterActivity();

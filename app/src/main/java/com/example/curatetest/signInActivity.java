@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -26,6 +27,8 @@ public class signInActivity extends AppCompatActivity {
     private String signInEmail;
     private String signInPass;
 
+    private ProgressBar signInPB;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +36,7 @@ public class signInActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         sessionManager = new Session(getApplicationContext());
+        signInPB = (ProgressBar) findViewById(R.id.signInProgressBar);
     }
 
     @Override
@@ -67,16 +71,19 @@ public class signInActivity extends AppCompatActivity {
 
     //SIGN IN VALIDATION
     public void signInUser(String email , String password){
+        signInPB.setVisibility(View.VISIBLE);
         mAuth.signInWithEmailAndPassword(email , password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
+                            signInPB.setVisibility(View.GONE);
                             FirebaseUser user = mAuth.getCurrentUser();
                             sessionManager.editor.clear();
                             sessionManager.editor.commit();
                             openDashboard();
                         }else{
+                            signInPB.setVisibility(View.GONE);
                             TextView passwordAlert = (TextView) findViewById(R.id.signInAlert);
                             passwordAlert.setVisibility(View.VISIBLE);
                             passwordAlert.setText("Invalid Password, try again!");

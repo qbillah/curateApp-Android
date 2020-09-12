@@ -114,5 +114,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/backHome" />
 
+    <ProgressBar
+        android:id="@+id/signInProgressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:visibility="invisible"
+        android:indeterminateDrawable="@drawable/spinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

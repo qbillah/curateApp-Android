@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -51,7 +52,13 @@ public class signInActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 signInPass = getSignInPass();
-                signInUser(signInEmail , signInPass);
+                if(signInPass.isEmpty()){
+                    TextView passwordAlert = (TextView) findViewById(R.id.signInAlert);
+                    passwordAlert.setVisibility(View.VISIBLE);
+                    passwordAlert.setText(getString(R.string.emptyField));
+                }else if(!signInPass.isEmpty()){
+                    signInUser(signInEmail , signInPass);
+                }
             }
         });
 
@@ -86,7 +93,7 @@ public class signInActivity extends AppCompatActivity {
                             signInPB.setVisibility(View.GONE);
                             TextView passwordAlert = (TextView) findViewById(R.id.signInAlert);
                             passwordAlert.setVisibility(View.VISIBLE);
-                            passwordAlert.setText("Invalid Password, try again!");
+                            passwordAlert.setText(getString(R.string.loginIncorrect));
                         }
                     }
                 });

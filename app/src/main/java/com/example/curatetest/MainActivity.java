@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart(){
         super.onStart();
-        //FIREBASE AUTH - IS LOGGED IN
+        //IF FIREBASE USER IS LOGGED IN TAKE TO DASHBOARD
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null){
             Intent curateDashboard = new Intent(this , dashboard.class);
@@ -71,11 +71,11 @@ public class MainActivity extends AppCompatActivity {
         //IF EMAIL IS NOT BLANK THEN VALIDATE EMAIL
         if(userEmail.isEmpty()){
             blankEmailAlert.setVisibility(View.VISIBLE);
+            blankEmailAlert.setText(getString(R.string.emptyField));
         }else{
 
             if(isValidEmail(userEmail) == true){
 
-                //REPLACE LATER - SHOULD CHECK DB FOR EMAIL ADDRESS
                 //IF EMAIL IS REGISTERED TAKE TO SIGN IN VIEW
                 //IF EMAIL ISN'T REGISTERED TAKE TO SIGN UP VIEW
 
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                 saveEmailPref(userEmail);
                 userExists(userEmail);
             }else if(isValidEmail(userEmail) == false){
-                blankEmailAlert.setText("Must be a valid email address.");
+                blankEmailAlert.setText(getString(R.string.emailAlert));
                 blankEmailAlert.setVisibility(View.VISIBLE);
             }
         }
@@ -113,9 +113,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void userExists(String user){
-
-        //
-        //
         mainPB.setVisibility(View.VISIBLE);
         mAuth.fetchSignInMethodsForEmail(user)
                 .addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>() {

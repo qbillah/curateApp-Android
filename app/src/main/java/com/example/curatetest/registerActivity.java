@@ -1,51 +1,117 @@
 package com.example.curatetest;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class registerActivity extends AppCompatActivity {
 
+    private FirebaseAuth mAuth;
     private Session session;
 
     private EditText getUsername;
     private EditText getPassword;
+    private TextView regAlert;
 
     private String emailAddress;
     private String username;
     private String password;
 
+    private Boolean validateUserFlag;
+
     Session sessionManager;
 
-    public static final String SHARED_PREFS = "sharedPrefs";
+    private ProgressBar regiPB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sessionManager = new Session(getApplicationContext());
         setContentView(R.layout.activity_register);
-        //System.out.println(sessionManager.getUserEmail());
+
+        mAuth = FirebaseAuth.getInstance();
+        sessionManager = new Session(getApplicationContext());
+
+        regiPB = (ProgressBar) findViewById(R.id.registerProgressBar);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 
     public void signUp(View V){
-        getUsername = (EditText) findViewById(R.id.userEmail);
+
+        getUsername = (EditText) findViewById(R.id.userName);
         getPassword = (EditText) findViewById(R.id.password);
         username = getUsername.getText().toString();
         password = getPassword.getText().toString();
+        emailAddress = sessionManager.getUserEmail();
 
-        if(validateUsername(username)){
-            if(validatePassword(password)){
-                registerAndLogin(username);
-            }else if(!validatePassword(password)){
-                System.out.println("err1");
+        regAlert = (TextView) findViewById(R.id.registerAlert);
+
+        //FIREBASE DATABASE REFERENCE
+        //QUERY THE DB
+        //IN THE USER CHILD CHECK IF USERNAME MATCHES EXISTING USERNAME
+        //IF NOT EXIST - REGISTER
+        //IF EXIST - THROW ERROR
+
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        Query query = reference.child("users").orderByChild("username").equalTo(username);
+
+        regiPB.setVisibility(View.VISIBLE);
+
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // - USERNAME TAKEN
+                    regAlert.setText(getString(R.string.usernameAlert));
+                    regAlert.setVisibility(View.VISIBLE);
+                    regiPB.setVisibility(View.GONE);
+                }else{
+                    //IF USERNAME IS AVAILABLE
+                    //CHECK PASSWORD - IF PASSWORD MEETS REQUIREMENTS - REGISTER USER
+                    if(validatePassword(password)){
+                        regiPB.setVisibility(View.GONE);
+                        registerAndLogin(username , emailAddress , password);
+                    }else if(!validatePassword(password)){
+                        // - PASSWORD DOES NOT MEET REQUIREMENTS
+                        regiPB.setVisibility(View.GONE);
+                        regAlert.setText(getString(R.string.passwordAlert));
+                        regAlert.setVisibility(View.VISIBLE);
+                    }
+                }
             }
-        }else if(!validateUsername(username)){
-            System.out.println("err2");
-        }
-    }
+            @Override
+            public void onCancelled(DatabaseError error) {
+                //DO SOMETHING ON DATABASE READ ERROR
+            }
+        });
 
+    }
 
     public void goHome(View V){
         Intent curateHome = new Intent(this,MainActivity.class);
@@ -53,11 +119,6 @@ public class registerActivity extends AppCompatActivity {
     }
 
     //USERNAME & PASSWORD VALIDATION - ADD HERE
-
-    private boolean validateUsername(String username){
-        //RUN DB FOR USERNAME VALIDATION
-        return true;
-    }
 
     private boolean validatePassword(String password){
         boolean flag = false;
@@ -89,19 +150,55 @@ public class registerActivity extends AppCompatActivity {
         return flag;
     }
 
-    private void registerAndLogin(String username){
-        //TWO PARTS
-        //1. REGISTER USER INTO DB
-        //2. START SESSION AND LOG IN USER
+    private void registerAndLogin(final String username , String email , String password){
+        /*
+            REGISTER AND LOGIN:
+            1. AUTHENTICATE AND ADD USER TO FIREBASE AUTH
+            2. MAKE USER CHILD FOR NEW USER WITH USER UID IN FIREBASE RDB
+            3. SET SESSIONS FOR USER
+            4. REDIRECT USER TO DASHBOARD VIEW
+         */
 
-        //PART 2 - SORT OF
-        Session sessionManager = new Session(getApplicationContext());
-        sessionManager.setUserName(username);
-        sessionManager.setLogin(true);
+        //CREATE FIREBASE AUTHENTICATED USER
+        regiPB.setVisibility(View.VISIBLE);
+        mAuth.createUserWithEmailAndPassword(email , password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
 
-        System.out.println("Logged In");
 
-        //REDIRECT TO USER DASHBOARD AFTER USER IS REGISTERED AND LOGGED IN
+
+                            //GET CURRENT USER FOR REGISTERED USER
+                            FirebaseUser user = mAuth.getCurrentUser();
+
+                            //GET UID OF REGISTERED USER
+                            String UID = user.getUid();
+                            Log.d("UID" , UID);
+
+                            //CREATE NEW USER CHILD WITH UID CONTAINING EMAIL / USERNAME CHILDS
+                            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("users");
+
+                            Map<String, String> userData = new HashMap<String, String>();
+                            userData.put("email" , emailAddress);
+                            userData.put("username" , username);
+
+                            reference.push().setValue(userData);
+
+                            regiPB.setVisibility(View.GONE);
+                            regAlert.setVisibility(View.GONE);
+                            openDashboard();
+
+                        }else{
+                            regAlert.setText(getString(R.string.criticalAlert1));
+                            regAlert.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
+
+    }
+
+    public void openDashboard(){
         Intent curateDashboard = new Intent(this , dashboard.class);
         startActivity(curateDashboard);
     }

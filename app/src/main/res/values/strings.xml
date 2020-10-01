@@ -2,4 +2,16 @@
     <string name="app_name">CurateTest</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <string name="emailAlert">Invalid email!</string>
+    <string name="usernameAlert">Username is already taken!</string>
+    <string name="passwordAlert">Password doesn\'t meet requirements!</string>
+
+    <string name="loginIncorrect">Incorrect login information!</string>
+
+    <string name="emptyField">Please fill in empty field(s)!</string>
+
+    <string name="criticalAlert1">Ooops, something went wrong!</string>
+
 </resources>

@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void forgotPassword (){
+    public void openForgotPassword (){
         //TAKE TO FORGOT PASSWORD VIEW
     }
 

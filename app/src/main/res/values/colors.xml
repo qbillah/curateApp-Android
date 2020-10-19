@@ -4,6 +4,6 @@
     <color name="colorPrimaryDark">#fff</color>
     <color name="colorAccent">#fff</color>
     <color name="borderColor">#000</color>
-    <color name="dialogPositiveButtonText">#008577</color>
-    <color name="dialogNegativeButtonText">#f00</color>
+    <color name="dialogPositiveButtonText">#296DF6</color>
+    <color name="dialogNegativeButtonText">#000</color>
 </resources>

@@ -182,8 +182,9 @@ public class registerActivity extends AppCompatActivity {
                             Map<String, String> userData = new HashMap<String, String>();
                             userData.put("email" , emailAddress);
                             userData.put("username" , username);
+                            userData.put("bio" , "Check out my fits on Curate");
 
-                            reference.push().setValue(userData);
+                            reference.child(user.getUid()).setValue(userData);
 
                             regiPB.setVisibility(View.GONE);
                             regAlert.setVisibility(View.GONE);

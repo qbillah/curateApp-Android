@@ -6,19 +6,72 @@
     android:layout_height="match_parent"
     tools:context=".ClosetFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/logout"
-            android:layout_width="wrap_content"
+        <ImageView
+            android:id="@+id/mainUserProfile"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_marginTop="35dp"
+            android:src="@drawable/ic_unassigned_profileiocn"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/userID"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Logout"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_marginTop="12dp"
+            android:gravity="center_horizontal"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/userBio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:gravity="center_horizontal"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="italic" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/profileTabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            app:tabIndicatorColor="@color/colorPrimary"
+            app:tabRippleColor="#FFFFFF">
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/profileHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Outfits" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/profileBrands"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Brands" />
+
+            <com.google.android.material.tabs.TabItem
+                android:id="@+id/profileSettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Settings" />
+
+        </com.google.android.material.tabs.TabLayout>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/profileFragView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
 </FrameLayout>

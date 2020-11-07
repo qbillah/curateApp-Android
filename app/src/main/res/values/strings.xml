@@ -14,4 +14,10 @@
 
     <string name="criticalAlert1">Ooops, something went wrong!</string>
 
+
+    <string name="setting_discoverable">Profile Discoverability</string>
+    <string name="setting_discoverable_description">Allow your profile to be discovered via the explore page.</string>
+
+    <string name="setting_bio">Change / Update your bio</string>
+
 </resources>

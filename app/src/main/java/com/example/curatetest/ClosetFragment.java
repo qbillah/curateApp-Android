@@ -7,8 +7,10 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,9 +37,11 @@ public class ClosetFragment extends Fragment {
 
     private FirebaseAuth mAuth;
 
+    private SwipeRefreshLayout closetRefresh;
     private TextView displayUserID , displayUserBio;
     private TabLayout userTabLayout;
     private ViewPager2 userTabDisplay;
+
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -86,6 +90,7 @@ public class ClosetFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_closet, container, false);
 
+        closetRefresh = (SwipeRefreshLayout) view.findViewById(R.id.closetRefresh);
         displayUserID = (TextView) view.findViewById(R.id.userID);
         displayUserBio = (TextView) view.findViewById(R.id.userBio);
         userTabLayout = (TabLayout) view.findViewById(R.id.profileTabLayout);
@@ -116,14 +121,51 @@ public class ClosetFragment extends Fragment {
         }
         );
         tabMediator.attach();
-
         return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        Log.d("UID" , mAuth.getUid());
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        Query query = reference.child("users").child(mAuth.getUid());
+
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String user = dataSnapshot.child("username").getValue(String.class);
+                    String bio = dataSnapshot.child("bio").getValue(String.class);
+                    displayUserID.setText("@" + user);
+                    displayUserBio.setText(bio);
+                }else{
+                    displayUserID.setText("nil");
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {
+                displayUserID.setText("nil");
+            }
+        });
+
+        //REFRESH VIEW ON PULL
+
+        closetRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                profileRefresh();
+                final Runnable r = new Runnable() {
+                    public void run() {
+                        closetRefresh.setRefreshing(false);
+                    }
+                };
+                new Handler().postDelayed(r , 1000);
+            }
+        });
+
+    }
+
+    public void profileRefresh(){
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         Query query = reference.child("users").child(mAuth.getUid());
 
@@ -145,4 +187,5 @@ public class ClosetFragment extends Fragment {
             }
         });
     }
+
 }

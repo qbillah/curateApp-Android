@@ -22,4 +22,8 @@
         <item name="android:textColor">@color/dialogPositiveButtonText</item>
     </style>
 
+    <style name="switchStyle1">
+        <item name="colorControlActivated">@color/dialogPositiveButtonText</item>
+    </style>
+
 </resources>

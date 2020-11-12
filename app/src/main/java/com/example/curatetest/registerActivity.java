@@ -38,6 +38,7 @@ public class registerActivity extends AppCompatActivity {
     private String emailAddress;
     private String username;
     private String password;
+    private static final String defaultPPF = "https://firebasestorage.googleapis.com/v0/b/curateapp-72ea6.appspot.com/o/ppf%2Fdefault.png?alt=media&token=015f1044-66bf-4656-9597-c372ddc0772b";
 
     private Boolean validateUserFlag;
 
@@ -69,7 +70,6 @@ public class registerActivity extends AppCompatActivity {
         username = getUsername.getText().toString();
         password = getPassword.getText().toString();
         emailAddress = sessionManager.getUserEmail();
-
         regAlert = (TextView) findViewById(R.id.registerAlert);
 
         //FIREBASE DATABASE REFERENCE
@@ -182,6 +182,7 @@ public class registerActivity extends AppCompatActivity {
                             Map<String, String> userData = new HashMap<String, String>();
                             userData.put("email" , emailAddress);
                             userData.put("username" , username);
+                            userData.put("PPF" , defaultPPF);
                             userData.put("bio" , "Check out my fits on Curate");
 
                             reference.child(user.getUid()).setValue(userData);

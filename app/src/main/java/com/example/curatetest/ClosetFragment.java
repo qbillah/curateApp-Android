@@ -1,16 +1,19 @@
 package com.example.curatetest;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +21,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,6 +32,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -36,12 +46,12 @@ import com.google.firebase.database.ValueEventListener;
 public class ClosetFragment extends Fragment {
 
     private FirebaseAuth mAuth;
+    private StorageReference storageRef; // STORAGE REFERENCE - FIREBASE
 
-    private SwipeRefreshLayout closetRefresh;
     private TextView displayUserID , displayUserBio;
     private TabLayout userTabLayout;
     private ViewPager2 userTabDisplay;
-
+    private CircleImageView userPPF;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -82,6 +92,7 @@ public class ClosetFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         mAuth = FirebaseAuth.getInstance();
+        storageRef = FirebaseStorage.getInstance().getReference(); // INIT - FIREBASE STORAGE REFERENCE
     }
 
     @Override
@@ -90,11 +101,11 @@ public class ClosetFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_closet, container, false);
 
-        closetRefresh = (SwipeRefreshLayout) view.findViewById(R.id.closetRefresh);
         displayUserID = (TextView) view.findViewById(R.id.userID);
         displayUserBio = (TextView) view.findViewById(R.id.userBio);
         userTabLayout = (TabLayout) view.findViewById(R.id.profileTabLayout);
         userTabDisplay = (ViewPager2) view.findViewById(R.id.profileFragView);
+
 
         //FRAGMENT IN A FRAGMENT - FRAGMENTCEPTION
         //final ProfileTabAdapter adapter = new ProfileTabAdapter(this , getFragmentManager() , userTabLayout.getTabCount());
@@ -114,13 +125,16 @@ public class ClosetFragment extends Fragment {
                         tab.setText("Brands");
                         break;
                     case 2:
-                        tab.setText("Settings");
+                        tab.setText("You");
                         break;
                 }
             }
         }
         );
         tabMediator.attach();
+
+
+
         return view;
     }
 
@@ -136,8 +150,12 @@ public class ClosetFragment extends Fragment {
                 if (dataSnapshot.exists()) {
                     String user = dataSnapshot.child("username").getValue(String.class);
                     String bio = dataSnapshot.child("bio").getValue(String.class);
+                    String ppf = dataSnapshot.child("PPF").getValue(String.class);
                     displayUserID.setText("@" + user);
                     displayUserBio.setText(bio);
+
+                    userPPF = (CircleImageView) getView().findViewById(R.id.userPPF);
+                    Picasso.get().load(ppf).resize(55, 55).centerCrop().into(userPPF);
                 }else{
                     displayUserID.setText("nil");
                 }
@@ -148,44 +166,6 @@ public class ClosetFragment extends Fragment {
             }
         });
 
-        //REFRESH VIEW ON PULL
-
-        closetRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                profileRefresh();
-                final Runnable r = new Runnable() {
-                    public void run() {
-                        closetRefresh.setRefreshing(false);
-                    }
-                };
-                new Handler().postDelayed(r , 1000);
-            }
-        });
-
-    }
-
-    public void profileRefresh(){
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-        Query query = reference.child("users").child(mAuth.getUid());
-
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String user = dataSnapshot.child("username").getValue(String.class);
-                    String bio = dataSnapshot.child("bio").getValue(String.class);
-                    displayUserID.setText("@" + user);
-                    displayUserBio.setText(bio);
-                }else{
-                    displayUserID.setText("nil");
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError error) {
-                displayUserID.setText("nil");
-            }
-        });
     }
 
 }

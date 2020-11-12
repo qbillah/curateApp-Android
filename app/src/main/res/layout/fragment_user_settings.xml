@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -18,11 +19,43 @@
             android:paddingTop="15dp"
             android:paddingRight="24dp">
 
+            <ProgressBar
+                android:id="@+id/settingsProgress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:layout_marginBottom="5dp"
+                android:progressDrawable="@drawable/progress" />
+
             <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="0dp"
                 android:layout_weight="1">
+
+                <TableRow
+                    android:id="@+id/ppfChangeSettings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <Button
+                        android:id="@+id/changePPF"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight=".5"
+                        android:background="@android:color/transparent"
+                        android:text="Change Profile Photo"
+                        android:textColor="@color/dialogPositiveButtonText" />
+                </TableRow>
+
+                <View
+                    android:id="@+id/divider3"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="15dp"
+                    android:layout_weight="1"
+                    android:background="?android:attr/listDivider" />
 
                 <TableRow
                     android:id="@+id/profileDiscoverability"
@@ -72,6 +105,104 @@
                     android:background="?android:attr/listDivider" />
 
                 <TableRow
+                    android:id="@+id/userFollowing"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp">
+
+                    <TextView
+                        android:id="@+id/textView5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/setting_following"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/userFollowingView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="0dp">
+
+                    <TextView
+                        android:id="@+id/textView6"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight=".5"
+                        android:text="@string/setting_following_description" />
+
+                    <Button
+                        android:id="@+id/viewFollowing"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/light_button"
+                        android:text="View"
+                        android:textColor="@color/colorAccent" />
+
+                </TableRow>
+
+                <View
+                    android:id="@+id/divider4"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    android:background="?android:attr/listDivider" />
+
+                <TableRow
+                    android:id="@+id/userSaved"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp">
+
+                    <TextView
+                        android:id="@+id/textView8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/setting_saved"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/userSavedView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="0dp">
+
+                    <TextView
+                        android:id="@+id/textView7"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight=".5"
+                        android:text="@string/setting_saved_description" />
+
+                    <Button
+                        android:id="@+id/viewSaved"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/light_button"
+                        android:text="View"
+                        android:textColor="@color/colorAccent" />
+
+                </TableRow>
+
+                <View
+                    android:id="@+id/divider5"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    android:background="?android:attr/listDivider" />
+
+                <TableRow
                     android:id="@+id/changeUserBio"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -88,6 +219,7 @@
                 </TableRow>
 
                 <TableRow
+                    android:id="@+id/changeUserBioSettings"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -120,6 +252,7 @@
             </TableLayout>
 
 
+
             <View
                 android:id="@+id/divider2"
                 android:layout_width="match_parent"
@@ -129,10 +262,12 @@
                 android:layout_weight="1"
                 android:background="?android:attr/listDivider" />
 
+
             <Button
                 android:id="@+id/logout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
                 android:layout_weight="1"
                 android:background="@drawable/dark_button"
                 android:text="Logout"
@@ -140,5 +275,7 @@
 
         </LinearLayout>
     </ScrollView>
+
+
 
 </FrameLayout>

@@ -1,16 +1,38 @@
 package com.example.curatetest;
 
+import android.Manifest;
+import android.animation.ObjectAnimator;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -19,9 +41,19 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.xml.datatype.Duration;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,11 +62,18 @@ import java.util.Map;
  */
 public class UserSettingsFragment extends Fragment {
 
+    private static final int RESULT_OK = -1;
     private FirebaseAuth mAuth;
+    private StorageReference storageRef;
+    private PermissionHelper permissionManager;
 
-    private Button logout , changeBio;
+    private Button logout , changeBio , changePPF;
     private EditText editBio;
+    private ProgressBar settingProg;
 
+    private String userChoosenTask;
+
+    private Uri profileURI;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -75,6 +114,8 @@ public class UserSettingsFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         mAuth = FirebaseAuth.getInstance();
+        storageRef = FirebaseStorage.getInstance().getReference();
+        permissionManager = new PermissionHelper(getContext());
     }
 
     @Override
@@ -84,6 +125,8 @@ public class UserSettingsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_user_settings, container, false);
 
         editBio = (EditText) view.findViewById(R.id.editBio);
+        settingProg = (ProgressBar) view.findViewById(R.id.settingsProgress);
+        settingProg.setVisibility(View.GONE);
 
         // Set logout button
 
@@ -123,14 +166,24 @@ public class UserSettingsFragment extends Fragment {
             }
         });
 
+        changePPF = (Button) view.findViewById(R.id.changePPF);
+        changePPF.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean read = permissionManager.hasReadExternalStoragePermission();
+                boolean write = permissionManager.hasReadExternalStoragePermission();
+                if(!read && !write){
+                    permissionManager.requestPermissions(read , write , getActivity());
+                }else{
+                    setPPF();
+                }
+
+            }
+        });
+
         return view;
     }
 
-    public void logout(){
-        mAuth.signOut();
-        Intent home = new Intent(getActivity() , MainActivity.class);
-        startActivity(home);
-    }
 
     public void changeBio(){
         FirebaseUser user = mAuth.getCurrentUser();
@@ -140,6 +193,125 @@ public class UserSettingsFragment extends Fragment {
         bio.put("bio" , changeBio);
         reference.child(user.getUid()).updateChildren(bio);
         editBio.setText("");
+    }
+
+    public void setPPF(){
+        final CharSequence[] options = {"Take Photo" , "Choose from Gallery" , "Cancel"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Change Profile Photo");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                //add permissions
+                if(options[i].equals("Take Photo")){
+                    userChoosenTask = "Take Photo";
+                    if(true){
+                        cameraIntent();
+                    }
+                }else if(options[i].equals("Choose from Gallery")){
+                    userChoosenTask = "Choose from Gallery";
+                    if(true){
+                        galleryIntent();
+                    }
+                }else if(options[i].equals("Cancel")){
+                    userChoosenTask = "Cancel";
+                    if(true){
+                        dialogInterface.dismiss();
+                    }
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void galleryIntent() {
+        Intent gallery = new Intent();
+        gallery.setType("image/*");
+        gallery.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(gallery ,  1);
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        //Log.d("IMG" , Integer.toString(requestCode));
+        //Log.d("IMG" , Integer.toString(resultCode));
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null && data.getData() != null){
+            profileURI = data.getData();
+            uploadPPF();
+        }
+    }
+
+    private void cameraIntent() {
+        Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(camera , 0);
+    }
+
+    public void uploadPPF(){
+
+        final StorageReference ppfRef = storageRef.child("ppf/"+mAuth.getUid()+"ppf");
+        UploadTask up = ppfRef.putFile(profileURI);
+
+        settingProg.setVisibility(View.VISIBLE);
+        up.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
+
+                double progress = (100 * snapshot.getBytesTransferred() / snapshot.getTotalByteCount());
+                ObjectAnimator animA = ObjectAnimator.ofInt(settingProg, "progress" , (int)progress);
+                animA.setDuration(415);
+                animA.setInterpolator(new LinearInterpolator());
+                animA.start();
+
+                //settingProg.setProgress((int)progress);
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                settingProg.setProgress(0);
+                settingProg.setVisibility(View.GONE);
+                Snackbar.make(getView() , "Profile Picture Updated" , Snackbar.LENGTH_SHORT)
+                        .show();
+            }
+        });
+
+        Task<Uri> urlTask = up.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            @Override
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
+                }
+                // Continue with the task to get the download URL
+                return ppfRef.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                if (task.isSuccessful()) {
+                    Uri downloadUri = task.getResult();
+
+                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference("users");
+                    HashMap PPF = new HashMap();
+                    PPF.put("PPF" , downloadUri.toString());
+                    reference.child(mAuth.getUid()).updateChildren(PPF);
+
+                    Log.d("URI" , downloadUri.toString());
+                } else {
+                    // Handle failures
+                    // ...
+                    Log.d("FBDB2" , "ERR");
+                }
+            }
+        });
+    }
+
+    public void logout(){
+        mAuth.signOut();
+        Intent home = new Intent(getActivity() , MainActivity.class);
+        startActivity(home);
     }
 
 }

@@ -20,4 +20,12 @@
 
     <string name="setting_bio">Change / Update your bio</string>
 
+    <string name="setting_ppfchange">Profile Picture</string>
+
+    <string name="setting_following">Following List</string>
+    <string name="setting_following_description">Look thru and manage the profiles you follow on the Curate App.</string>
+
+    <string name="setting_saved">Saved Posts</string>
+    <string name="setting_saved_description">Look thru posts you have saved on the Curate App.</string>
+
 </resources>

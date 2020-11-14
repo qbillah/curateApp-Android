@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -47,6 +48,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -237,12 +241,26 @@ public class UserSettingsFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        //USE THE LOGS TO FIND OUT REQUEST / RESULT CODES FOR CAMERA INTENT
         //Log.d("IMG" , Integer.toString(requestCode));
         //Log.d("IMG" , Integer.toString(resultCode));
+
         if (requestCode == 1 && resultCode == RESULT_OK && data != null && data.getData() != null){
+            //SET PROFILE URI TO DATA
+            //CONVERT URI INTO BITMAP
+            //CALL UPLOAD FUNCTION WITH BITMAP ARGUMENT
+            Bitmap ppfBitmap = null;
             profileURI = data.getData();
-            uploadPPF();
+            try {
+                ppfBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), profileURI);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            uploadPPF(ppfBitmap);
         }
+
+        //ADD AN ELSE IF STATEMENT FOR TAKING PHOTO DIRECTLY FROM CAMERA ROLL
+
     }
 
     private void cameraIntent() {
@@ -250,10 +268,14 @@ public class UserSettingsFragment extends Fragment {
         startActivityForResult(camera , 0);
     }
 
-    public void uploadPPF(){
+    public void uploadPPF(Bitmap b){
+
+        //IMAGE COMPRESSION CLASS
+        //TAKES THREE ARGUMENTS - CONVERTED BITMAP IMAGE, APPLICATION CONTEXT, AND UNIQUE ID (COULD BE PROVIDED BY MAUTH)
+        ImageCompress toCompress = new ImageCompress(b , getContext() , mAuth.getUid());
 
         final StorageReference ppfRef = storageRef.child("ppf/"+mAuth.getUid()+"ppf");
-        UploadTask up = ppfRef.putFile(profileURI);
+        UploadTask up = ppfRef.putFile(toCompress.CompressToFirebase()); //GET RETURNED URI FROM IMAGE COMPRESSION CLASS AND UPLOAD TO FIREBASE
 
         settingProg.setVisibility(View.VISIBLE);
         up.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {

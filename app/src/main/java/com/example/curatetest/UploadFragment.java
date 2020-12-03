@@ -99,7 +99,7 @@ public class UploadFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_upload, container, false);
 
-        close = rootView.findViewById(R.id.close); //'x' button
+        //close = rootView.findViewById(R.id.close); //'x' button
         image_added = rootView.findViewById(R.id.image_added);
         post = rootView.findViewById(R.id.post); //'post' button
         description = rootView.findViewById(R.id.description); //caption/description

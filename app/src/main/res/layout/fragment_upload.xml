@@ -33,7 +33,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentLeft="true"
-                    android:src="@drawable/ic_close"
+                    android:src="@drawable/ic_add_circle"
                     android:id="@+id/close"/>
 
                 <TextView

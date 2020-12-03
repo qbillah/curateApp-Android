@@ -28,8 +28,16 @@ public class ImageCompress {
 
     public Uri CompressToFirebase(){
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        toCompress.compress(Bitmap.CompressFormat.JPEG, 20, bytes);
+        toCompress.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
         String path = MediaStore.Images.Media.insertImage(ctx.getContentResolver(), toCompress ,"ppf/"+UiD+"ppf",null);
+        Uri toUploadUri = Uri.parse(path);
+        return toUploadUri;
+    }
+
+    public Uri CompressPostToFirebase(){
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        toCompress.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
+        String path = MediaStore.Images.Media.insertImage(ctx.getContentResolver(), toCompress ,UiD,null);
         Uri toUploadUri = Uri.parse(path);
         return toUploadUri;
     }

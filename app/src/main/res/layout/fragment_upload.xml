@@ -1,14 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".UploadFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="upload" />
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/uploadPreview"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:background="@android:color/black"
+                android:scaleType="fitCenter"
+                android:src="@drawable/clicktoadd" />
+
+            <ProgressBar
+                android:id="@+id/uploadProgress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:progressDrawable="@drawable/progress" />
+
+            <EditText
+                android:id="@+id/addTags"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="24dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginRight="24dp"
+                android:background="@drawable/edit_text_background"
+                android:hint="@string/upload_tag"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="5dp"
+                android:maxLines="1"/>
+
+            <Button
+                android:id="@+id/uploadPost"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginLeft="24dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="24dp"
+                android:background="@drawable/dark_button"
+                android:text="Upload"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </FrameLayout>

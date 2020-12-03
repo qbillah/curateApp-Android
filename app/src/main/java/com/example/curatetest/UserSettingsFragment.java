@@ -249,14 +249,8 @@ public class UserSettingsFragment extends Fragment {
             //SET PROFILE URI TO DATA
             //CONVERT URI INTO BITMAP
             //CALL UPLOAD FUNCTION WITH BITMAP ARGUMENT
-            Bitmap ppfBitmap = null;
             profileURI = data.getData();
-            try {
-                ppfBitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), profileURI);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            uploadPPF(ppfBitmap);
+            uploadPPF(profileURI);
         }
 
         //ADD AN ELSE IF STATEMENT FOR TAKING PHOTO DIRECTLY FROM CAMERA ROLL
@@ -268,14 +262,12 @@ public class UserSettingsFragment extends Fragment {
         startActivityForResult(camera , 0);
     }
 
-    public void uploadPPF(Bitmap b){
+    public void uploadPPF(Uri U){
 
         //IMAGE COMPRESSION CLASS
         //TAKES THREE ARGUMENTS - CONVERTED BITMAP IMAGE, APPLICATION CONTEXT, AND UNIQUE ID (COULD BE PROVIDED BY MAUTH)
-        ImageCompress toCompress = new ImageCompress(b , getContext() , mAuth.getUid());
-
         final StorageReference ppfRef = storageRef.child("ppf/"+mAuth.getUid()+"ppf");
-        UploadTask up = ppfRef.putFile(toCompress.CompressToFirebase()); //GET RETURNED URI FROM IMAGE COMPRESSION CLASS AND UPLOAD TO FIREBASE
+        UploadTask up = ppfRef.putFile(U); //GET RETURNED URI FROM IMAGE COMPRESSION CLASS AND UPLOAD TO FIREBASE
 
         settingProg.setVisibility(View.VISIBLE);
         up.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {

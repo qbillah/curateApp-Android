@@ -28,4 +28,6 @@
     <string name="setting_saved">Saved Posts</string>
     <string name="setting_saved_description">Look thru posts you have saved on the Curate App.</string>
 
+    <string name="upload_tag">Add your brands here, separated by commas.</string>
+
 </resources>

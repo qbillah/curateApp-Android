@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,24 +23,24 @@ public class ImageCompress {
 
     public ImageCompress(Bitmap b , Context c , String u){
         this.toCompress = b;
-        this.ctx = c;
         this.UiD = u;
     }
 
-    public Uri CompressToFirebase(){
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        toCompress.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
-        String path = MediaStore.Images.Media.insertImage(ctx.getContentResolver(), toCompress ,"ppf/"+UiD+"ppf",null);
-        Uri toUploadUri = Uri.parse(path);
-        return toUploadUri;
-    }
+    public Bitmap compressImage() {
 
-    public Uri CompressPostToFirebase(){
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        toCompress.compress(Bitmap.CompressFormat.JPEG, 50, bytes);
-        String path = MediaStore.Images.Media.insertImage(ctx.getContentResolver(), toCompress ,UiD,null);
-        Uri toUploadUri = Uri.parse(path);
-        return toUploadUri;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        toCompress.compress(Bitmap.CompressFormat.JPEG, 70, baos);// 100baos
+        int options = 100;
+        while (baos.toByteArray().length / 1024 > 100) { // 100kb,
+            baos.reset();// baosbaos
+            toCompress.compress(Bitmap.CompressFormat.JPEG, options, baos);// options%baos
+            options -= 10;// 10
+        }
+        ByteArrayInputStream isBm = new ByteArrayInputStream(
+                baos.toByteArray());// baosByteArrayInputStream
+        Bitmap bitmap = BitmapFactory.decodeStream(isBm, null, null);// ByteArrayInputStream
+
+        return bitmap;
     }
 
 }

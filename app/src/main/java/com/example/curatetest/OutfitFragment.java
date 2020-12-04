@@ -3,6 +3,7 @@ package com.example.curatetest;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.gridlayout.widget.GridLayout;
 
@@ -16,7 +17,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -92,8 +95,6 @@ public class OutfitFragment extends Fragment {
 
         postGrid = (GridView) v.findViewById(R.id.postGrid);
 
-
-
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users");
         Query query = ref.child(mAuth.getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -103,7 +104,8 @@ public class OutfitFragment extends Fragment {
                     String user = snapshot.child("username").getValue(String.class);
 
                     final Query posts = FirebaseDatabase.getInstance().getReference("posts").orderByChild("uploadedBy").equalTo(user);
-                    posts.addValueEventListener(new ValueEventListener() {
+
+                    posts.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -133,10 +135,69 @@ public class OutfitFragment extends Fragment {
                         }
                     });
 
+                    ChildEventListener cel = new ChildEventListener() {
+                        @Override
+                        public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                            if(snapshot.exists()){
+                                for (DataSnapshot snap : snapshot.getChildren()) {
+
+                                    String postID = snap.getKey().toString();
+                                    String URL = snap.child("URL").getValue().toString();
+                                    String timestamp = snap.child("timestamp").getValue().toString();
+                                    String uploadedBy = snap.child("uploadedBy").getValue().toString();
+
+                                    postIDs.add(postID);
+                                    postURLs.add(URL);
+
+                                    Collections.reverse(postIDs);
+                                    Collections.reverse(postURLs);
+                                }
+
+                                System.out.println(postURLs);
+                                postGrid.setAdapter(new ImageListAdapter(getContext() , postURLs));
+                            }
+                        }
+
+                        @Override
+                        public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                        }
+
+                        @Override
+                        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.exists()){
+                                for (DataSnapshot snap : snapshot.getChildren()) {
+
+                                    String postID = snap.getKey().toString();
+                                    String URL = snap.child("URL").getValue().toString();
+                                    String timestamp = snap.child("timestamp").getValue().toString();
+                                    String uploadedBy = snap.child("uploadedBy").getValue().toString();
+
+                                    postIDs.add(postID);
+                                    postURLs.add(URL);
+
+                                    Collections.reverse(postIDs);
+                                    Collections.reverse(postURLs);
+                                }
+
+                                System.out.println(postURLs);
+                                postGrid.setAdapter(new ImageListAdapter(getContext() , postURLs));
+                            }
+                        }
+
+                        @Override
+                        public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    };
 
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
@@ -149,6 +210,8 @@ public class OutfitFragment extends Fragment {
                 Toast.makeText(getContext(), postIDs.get(i), Toast.LENGTH_SHORT).show();
             }
         });
+
+
 
         return v;
     }

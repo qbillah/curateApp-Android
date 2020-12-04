@@ -3,6 +3,7 @@ package com.example.curatetest;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -12,7 +13,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -91,9 +94,15 @@ public class BrandsFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 if(snapshot.exists()){
-                    brands.addAll((Collection<? extends String>) snapshot.child("brands").getValue());
-                    ArrayAdapter adapter = new ArrayAdapter <String>(getContext() , R.layout.list_item , brands);
-                    brandList.setAdapter(adapter);
+                    int count = (int) snapshot.child("brands").getChildrenCount();
+                    if(count == 0){
+                        Snackbar.make(getView() , "Nothing to display!" , Snackbar.LENGTH_SHORT)
+                                .show();
+                    }else{
+                        brands.addAll((Collection<? extends String>) snapshot.child("brands").getValue());
+                        ArrayAdapter adapter = new ArrayAdapter <String>(getContext() , R.layout.list_item , brands);
+                        brandList.setAdapter(adapter);
+                    }
                 }
 
             }
@@ -103,6 +112,39 @@ public class BrandsFragment extends Fragment {
 
             }
         });
+
+        ChildEventListener cel = new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if(snapshot.exists()){
+                    brands.addAll((Collection<? extends String>) snapshot.child("brands").getValue());
+                    ArrayAdapter adapter = new ArrayAdapter <String>(getContext() , R.layout.list_item , brands);
+                    brandList.setAdapter(adapter);
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                brands.addAll((Collection<? extends String>) snapshot.child("brands").getValue());
+                ArrayAdapter adapter = new ArrayAdapter <String>(getContext() , R.layout.list_item , brands);
+                brandList.setAdapter(adapter);
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        };
 
         return v;
     }

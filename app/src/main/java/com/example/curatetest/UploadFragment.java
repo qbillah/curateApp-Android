@@ -209,8 +209,21 @@ public class UploadFragment extends Fragment {
                 timeStamp = timeStamp.replace("." , "");
 
                 //FIREBASE STORAGE REF
+
+                Bitmap b = null;
+                try {
+                    b = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), toUpload);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println(new ImageCompress(b , getContext() , mAuth.getUid()).compressImage());
+
+                String path = MediaStore.Images.Media.insertImage(getContext().getContentResolver(), b ,mAuth.getUid(),null);
+                Uri finalUri = Uri.parse(path);
+
                 final StorageReference postRef = storageRef.child("posts/"+mAuth.getUid()+"p"+timeStamp);
-                UploadTask up = postRef.putFile(toUpload);
+                UploadTask up = postRef.putFile(finalUri);
 
                 uploadProgress.setVisibility(View.VISIBLE);
                 up.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {

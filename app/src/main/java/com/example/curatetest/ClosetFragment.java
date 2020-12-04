@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -26,6 +27,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -133,32 +135,56 @@ public class ClosetFragment extends Fragment {
         );
         tabMediator.attach();
 
-
-
-        return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         Query query = reference.child("users").child(mAuth.getUid());
 
-        query.addValueEventListener(new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    String user = dataSnapshot.child("username").getValue(String.class);
-                    String bio = dataSnapshot.child("bio").getValue(String.class);
                     String ppf = dataSnapshot.child("PPF").getValue(String.class);
-                    displayUserID.setText("@" + user);
-                    displayUserBio.setText(bio);
 
                     userPPF = (CircleImageView) getView().findViewById(R.id.userPPF);
                     Picasso.get().load(ppf).resize(55, 55).centerCrop().into(userPPF);
+
+
+                    ChildEventListener cel = new ChildEventListener() {
+                        @Override
+                        public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                        }
+
+                        @Override
+                        public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                            if (snapshot.exists()) {
+                                String ppf = snapshot.child("PPF").getValue(String.class);
+
+                                userPPF = (CircleImageView) getView().findViewById(R.id.userPPF);
+                                Picasso.get().load(ppf).resize(55, 55).centerCrop().into(userPPF);
+                            }else{
+                                displayUserID.setText("nil");
+                            }
+                        }
+
+                        @Override
+                        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+                        }
+
+                        @Override
+                        public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    };
                 }else{
                     displayUserID.setText("nil");
                 }
+
             }
             @Override
             public void onCancelled(DatabaseError error) {
@@ -166,6 +192,24 @@ public class ClosetFragment extends Fragment {
             }
         });
 
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    String user = snapshot.child("username").getValue(String.class);
+                    String bio = snapshot.child("bio").getValue(String.class);
+                    displayUserID.setText("@" + user);
+                    displayUserBio.setText(bio);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        return view;
     }
 
 }

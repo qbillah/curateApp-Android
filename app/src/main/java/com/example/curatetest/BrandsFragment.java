@@ -89,7 +89,7 @@ public class BrandsFragment extends Fragment {
         brandList = (ListView) v.findViewById(R.id.brandDisplay);
 
         Query posts = FirebaseDatabase.getInstance().getReference("users").child(mAuth.getUid());
-        posts.addValueEventListener(new ValueEventListener() {
+        posts.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 

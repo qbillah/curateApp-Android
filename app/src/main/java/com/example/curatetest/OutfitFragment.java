@@ -1,5 +1,6 @@
 package com.example.curatetest;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -113,8 +114,6 @@ public class OutfitFragment extends Fragment {
 
                                 String postID = snap.getKey().toString();
                                 String URL = snap.child("URL").getValue().toString();
-                                String timestamp = snap.child("timestamp").getValue().toString();
-                                String uploadedBy = snap.child("uploadedBy").getValue().toString();
 
                                 postIDs.add(postID);
                                 postURLs.add(URL);
@@ -207,11 +206,11 @@ public class OutfitFragment extends Fragment {
         postGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(getContext(), postIDs.get(i), Toast.LENGTH_SHORT).show();
+                Intent goToPost = new Intent(getActivity() , ViewProfilePost.class);
+                goToPost.putExtra("postID" , postIDs.get(i));
+                startActivity(goToPost);
             }
         });
-
-
 
         return v;
     }

@@ -2,11 +2,32 @@ package com.example.curatetest;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.gridlayout.widget.GridLayout;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -14,6 +35,13 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class OutfitFragment extends Fragment {
+
+    private FirebaseAuth mAuth;
+
+    private GridView postGrid;
+
+    ArrayList<String> postURLs = new ArrayList<>();
+    ArrayList<String> postIDs = new ArrayList<>();
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -53,12 +81,75 @@ public class OutfitFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        mAuth = FirebaseAuth.getInstance();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_outfit, container, false);
+        View v = inflater.inflate(R.layout.fragment_outfit, container, false);
+
+        postGrid = (GridView) v.findViewById(R.id.postGrid);
+
+
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users");
+        Query query = ref.child(mAuth.getUid());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    String user = snapshot.child("username").getValue(String.class);
+
+                    final Query posts = FirebaseDatabase.getInstance().getReference("posts").orderByChild("uploadedBy").equalTo(user);
+                    posts.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            for (DataSnapshot snap : snapshot.getChildren()) {
+
+                                String postID = snap.getKey().toString();
+                                String URL = snap.child("URL").getValue().toString();
+                                String timestamp = snap.child("timestamp").getValue().toString();
+                                String uploadedBy = snap.child("uploadedBy").getValue().toString();
+
+                                postIDs.add(postID);
+                                postURLs.add(URL);
+
+                                Collections.reverse(postIDs);
+                                Collections.reverse(postURLs);
+                            }
+
+                            System.out.println(postURLs);
+
+                            postGrid.setAdapter(new ImageListAdapter(getContext() , postURLs));
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        postGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Toast.makeText(getContext(), postIDs.get(i), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        return v;
     }
 }

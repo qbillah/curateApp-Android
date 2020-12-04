@@ -2,11 +2,27 @@ package com.example.curatetest;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -14,6 +30,12 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  */
 public class BrandsFragment extends Fragment {
+
+    private FirebaseAuth mAuth;
+
+    private ListView brandList;
+
+    private ArrayList<String> brands = new ArrayList<>();
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -53,12 +75,35 @@ public class BrandsFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        mAuth = FirebaseAuth.getInstance();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_brands, container, false);
+        View v = inflater.inflate(R.layout.fragment_brands, container, false);
+        brandList = (ListView) v.findViewById(R.id.brandDisplay);
+
+        Query posts = FirebaseDatabase.getInstance().getReference("users").child(mAuth.getUid());
+        posts.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if(snapshot.exists()){
+                    brands.addAll((Collection<? extends String>) snapshot.child("brands").getValue());
+                    ArrayAdapter adapter = new ArrayAdapter <String>(getContext() , R.layout.list_item , brands);
+                    brandList.setAdapter(adapter);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        return v;
     }
 }

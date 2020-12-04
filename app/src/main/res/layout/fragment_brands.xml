@@ -6,9 +6,10 @@
     tools:context=".BrandsFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <ListView
+        android:id="@+id/brandDisplay"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Brands" />
+        android:layout_height="match_parent" />
 
 </FrameLayout>
